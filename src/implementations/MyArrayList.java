@@ -36,8 +36,32 @@ public class MyArrayList<E> implements ListADT<E> {
     private void ensureCapacity() {
         if (size == data.length) {
             E[] newData = (E[]) new Object[data.length * 2];
-            System.arraycopy(data, 0, newData, 0, data.length);
+            arrayCopy(data, 0, newData, 0, data.length);
             data = newData;
+        }
+    }
+    
+    /**
+     * Copies elements from one array to another.
+     *
+     * @param src The source array.
+     * @param srcPos The starting position in the source array.
+     * @param result The destination array.
+     * @param destPos The starting position in the destination array.
+     * @param length The number of elements to copy.
+     */
+    public void arrayCopy(E[] src, int srcPos, Object[] result, int destPos, int length) {
+        // Check for overlapping regions to handle correctly
+        if (src == result && srcPos < destPos && srcPos + length > destPos) {
+            // Overlap case: copy from end to start to avoid overwriting elements
+            for (int i = length - 1; i >= 0; i--) {
+                result[destPos + i] = src[srcPos + i];
+            }
+        } else {
+            // Normal case: copy from start to end
+            for (int i = 0; i < length; i++) {
+                result[destPos + i] = src[srcPos + i];
+            }
         }
     }
 
@@ -72,7 +96,7 @@ public class MyArrayList<E> implements ListADT<E> {
 		if (toAdd == null) throw new NullPointerException("Cannot add null element to the list");
         if (index < 0 || index > size) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         ensureCapacity();
-        System.arraycopy(data, index, data, index + 1, size - index);
+        arrayCopy(data, index, data, index + 1, size - index);
         data[index] = toAdd;
         size++;
         return true;
@@ -125,7 +149,7 @@ public class MyArrayList<E> implements ListADT<E> {
         E element = data[index];
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(data, index + 1, data, index, numMoved);
+            arrayCopy(data, index + 1, data, index, numMoved);
         }
         data[--size] = null; // clear the last element and decrease the size.
         return element;
@@ -191,9 +215,10 @@ public class MyArrayList<E> implements ListADT<E> {
 		// TODO Auto-generated method stub
 		if (toHold == null) throw new NullPointerException("Input array cannot be null");
         if (toHold.length < size) {
-            toHold = (E[]) java.lang.reflect.Array.newInstance(toHold.getClass().getComponentType(), size);
+        	toHold = (E[]) new Object[size]; // This creates an Object array, not an array of E!
+            //toHold = (E[]) java.lang.reflect.Array.newInstance(toHold.getClass().getComponentType(), size); // this way will keep the Type Safety.
         }
-        System.arraycopy(data, 0, toHold, 0, size);
+        arrayCopy(data, 0, toHold, 0, size);
         
         // Set all elements beyond 'size' in 'toHold' to null
         if (toHold.length > size) {
@@ -211,7 +236,7 @@ public class MyArrayList<E> implements ListADT<E> {
 	public Object[] toArray() {
 		// TODO Auto-generated method stub
 		Object[] result = new Object[size];
-		System.arraycopy(data, 0, result, 0, size);
+		arrayCopy(data, 0, result, 0, size);
 	    return result;
 	}
 
